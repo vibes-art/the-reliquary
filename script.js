@@ -2,7 +2,6 @@ var TH = "";
 for (var i = 0; i < 8; i++) { TH += H.substr(2, 6); }
 H = "0x" + TH;
 
-var HB = false;
 var PC = 64;
 var MT = 50;
 
@@ -24,6 +23,7 @@ var wH = 0;
 var cS = 1;
 var canvas = null;
 var ctx = null;
+var styleSheet = null;
 
 var L2 = V > 1;
 var BC2 = [{x:0.5,y:0.5},{x:0.75,y:0}];
@@ -484,8 +484,6 @@ if (N=="Lost") {
   };
 }
 
-window.onload = function () { init(); };
-
 function gAD () {
   return {
     id: 0,
@@ -562,8 +560,7 @@ function init () {
 };
 
 function sRO () {
-  HB = !!document.body;
-  var body = HB ? document.body : document.all[1];
+  var body = document.body;
   wW = max(body.clientWidth, window.innerWidth);
   wH = max(body.clientHeight, window.innerHeight);
 
@@ -576,32 +573,36 @@ function sRO () {
   cP.length = 0;
 };
 
+function sRH () {
+  window.addEventListener('resize', function () {
+    sRO();
+    rC();
+  }, true);
+};
+
 function cEl () {
-  var body = HB ? document.body : document.all[1];
-  canvas = HB
-    ? document.createElement("canvas")
-    : document.getElementById("canvas");
-
+  canvas = document.createElement("canvas");
   ctx = canvas.getContext("2d");
-  HB && body.appendChild(canvas);
-
-  var size = floor(cS * PC);
-  var styleSheet = document.createElement("style");
-  styleSheet.innerText = `canvas { width: ${size}px; height: ${size}px; image-rendering: -moz-crisp-edges; image-rendering: -webkit-crisp-edges; image-rendering: pixelated; image-rendering: crisp-edges; }`;
-  body.appendChild(styleSheet);
+  document.body.appendChild(canvas);
+  sRH();
 };
 
 function rC () {
-  if (HB) {
-    var x = floor((wW - cS * PC) / 2);
-    var y = floor((wH - cS * PC) / 2);
-    canvas.style.position = "absolute";
-    canvas.style.left = x + "px";
-    canvas.style.top = y + "px";
-  }
-
+  var x = floor((wW - cS * PC) / 2);
+  var y = floor((wH - cS * PC) / 2);
+  canvas.style.position = "absolute";
+  canvas.style.left = x + "px";
+  canvas.style.top = y + "px";
   canvas.width = PC;
   canvas.height = PC;
+
+  if (!styleSheet) {
+    styleSheet = document.createElement("style");
+    document.body.appendChild(styleSheet);
+  }
+
+  var size = floor(cS * PC);
+  styleSheet.innerText = `canvas { width: ${size}px; height: ${size}px; image-rendering: -moz-crisp-edges; image-rendering: -webkit-crisp-edges; image-rendering: pixelated; image-rendering: crisp-edges; }`;
 };
 
 function gC (value, dimension) {
@@ -737,14 +738,13 @@ function lPP () {
 };
 
 function cGD (glyphData) {
-  var body = HB ? document.body : document.all[1];
   var clipboard = document.createElement("input");
   clipboard.className = "clipboard";
-  body.appendChild(clipboard);
+  document.body.appendChild(clipboard);
   clipboard.value = glyphData;
   clipboard.select();
   document.execCommand("copy");
-  body.removeChild(clipboard);
+  document.body.removeChild(clipboard);
 };
 
 function oAF (timestamp) {
@@ -1417,3 +1417,5 @@ function cN (sc, xp) {
 
   return nO;
 };
+
+init();

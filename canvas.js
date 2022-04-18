@@ -1,9 +1,8 @@
 // H = "0xce18ad38b5442204e66b525d38e65fbc239bef56f885440b37f7ab507284fefd";
 USE_RANDOM_HASH = true;
 
-var PIXEL_ART = SAVE_JOLTEON;
-var HAS_BODY = false;
-var UPGRADED = true;
+var PIXEL_ART = null;
+var UPGRADED = false;
 
 if (USE_RANDOM_HASH) {
   H = "";
@@ -34,13 +33,13 @@ var MAX_MINING_ATTEMPTS = 10000000;
 var MINE_FOR_HASH = {
   enabled: true && USE_RANDOM_HASH,
   // elementID: "Earth",
-  essenceID: "Magnetic",
-  paletteID: "Thunder",
+  // essenceID: "Dwarven",
+  // paletteID: "Coal",
   // styleID: "Sketch",
   // speedID: "Zen",
   // gravityID: "Atmospheric",
   // displayID: "UpsideDown",
-  colorPointCount: 4
+  // colorPointCount: 2
 };
 
 var PI = Math.PI;
@@ -1311,6 +1310,7 @@ var windowHeight = 0;
 var canvasScale = 1;
 var canvas = null;
 var ctx = null;
+var styleSheet = null;
 
 var styleID = "";
 var displayID = "";
@@ -1382,8 +1382,6 @@ function SORT_RANDOM_STEP () {
   if (sortValue >= 2) { sortValue -= 3; }
   return value;
 };
-
-window.onload = function () { initialize(); };
 
 function getAnimData () {
   return {
@@ -1468,8 +1466,7 @@ function initialize () {
 };
 
 function setRenderOptions () {
-  HAS_BODY = !!document.body;
-  var body = HAS_BODY ? document.body : document.all[1];
+  var body = document.body;
   windowWidth = max(body.clientWidth, window.innerWidth);
   windowHeight = max(body.clientHeight, window.innerHeight);
 
@@ -1484,17 +1481,35 @@ function setRenderOptions () {
   colorPoints.length = 0;
 };
 
-function createElements () {
-  var body = HAS_BODY ? document.body : document.all[1];
-  canvas = HAS_BODY
-    ? document.createElement("canvas")
-    : document.getElementById("canvas");
+function setResizeHandler () {
+  window.addEventListener('resize', function () {
+    setRenderOptions();
+    resizeCanvas();
+  }, true);
+};
 
+function createElements () {
+  canvas = document.createElement("canvas");
   ctx = canvas.getContext("2d");
-  HAS_BODY && body.appendChild(canvas);
+  document.body.appendChild(canvas);
+  setResizeHandler();
+};
+
+function resizeCanvas () {
+  var x = floor((windowWidth - canvasScale * PIXEL_COUNT) / 2);
+  var y = floor((windowHeight - canvasScale * PIXEL_COUNT) / 2);
+  canvas.style.position = "absolute";
+  canvas.style.left = x + "px";
+  canvas.style.top = y + "px";
+  canvas.width = PIXEL_COUNT;
+  canvas.height = PIXEL_COUNT;
+
+  if (!styleSheet) {
+    styleSheet = document.createElement("style");
+    document.body.appendChild(styleSheet);
+  }
 
   var size = floor(canvasScale * PIXEL_COUNT);
-  var styleSheet = document.createElement("style");
   styleSheet.innerText = `canvas {
     width: ${size}px;
     height: ${size}px;
@@ -1503,20 +1518,6 @@ function createElements () {
     image-rendering: pixelated;
     image-rendering: crisp-edges;
   }`;
-  body.appendChild(styleSheet);
-};
-
-function resizeCanvas () {
-  if (HAS_BODY) {
-    var x = floor((windowWidth - canvasScale * PIXEL_COUNT) / 2);
-    var y = floor((windowHeight - canvasScale * PIXEL_COUNT) / 2);
-    canvas.style.position = "absolute";
-    canvas.style.left = x + "px";
-    canvas.style.top = y + "px";
-  }
-
-  canvas.width = PIXEL_COUNT;
-  canvas.height = PIXEL_COUNT;
 };
 
 function getCoordinate (value, dimension) {
@@ -2527,3 +2528,5 @@ function createNoise (scale, exponent) {
 
   return noiseObj;
 };
+
+initialize();
